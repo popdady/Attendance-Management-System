@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>AMS: Mark Attendance</title>
+  </head>
+  <body><center>
+    <form method="post" action=".">
+      {% csrf_token %}
+      <input type="submit" name="" value="{{button_text}}" />
+    </form>
+    <p>{{msg}}</p>
+  </body>
+</html>

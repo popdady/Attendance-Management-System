@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>AMS</title>
+</head>
+<body>
+{% if user.username %}
+<p>Welcome {{ user.username }}!</p>
+<a href="/logout/">logout</a>
+<a href="/mark_attendance">Mark Attendance</a>
+{% else %}
+<p>Welcome Guest!
+You need to <a href="/login/">login</a>
+</p>
+{% endif %}
+</body>
+</html>
