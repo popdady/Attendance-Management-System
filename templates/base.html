@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="/site_media/css/main.css" type="text/css" />
+    </head>
+    <body>
+        <div class="page">
+            <div class="welcome-user-text">
+                {%if user.username%}
+                Welcome {{user.username}}!
+                <a href="/logout/">Logout</a>
+                {%else%}
+                Welcome Guest!
+          {%endif%}
+            </div>
+            <div class="header">
+                Attendance Management System
+            </div>
+            <div class="content">
+                {%block container%}{%endblock%}
+            </div>
+            <hr />
+            <div class="footer">
+                <a href="/" style="margin-right: 4px;"> Home</a>|
+                <a href="/mark_attendance" style="margin-right: 4px;">Mark Attendance</a>|
+                <a href="/attendance_detail" style="margin-right: 4px;">Attendance Detail</a>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,12 +1,12 @@
-<html>
-  <head>
-    <title>AMS: Mark Attendance</title>
-  </head>
-  <body><center>
+{% extends "base.html" %}
+{% block title %}AMS: Mark Attendance{% endblock %}
+{%block container%}
+<div class="mark-attendance">
     <form method="post" action=".">
       {% csrf_token %}
-      <input type="submit" name="" value="{{button_text}}" />
+      <input type="submit" name="" value="{{button_text}}" style="width: 120px; height: 50px; font-family: monospace;font-size: 18px;" />
     </form>
     <p>{{msg}}</p>
-  </body>
-</html>
+</div>
+{% endblock %}
+

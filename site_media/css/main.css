@@ -1,0 +1,82 @@
+body{
+    font-family: Verdana,Geneva,sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    background-color: #e3f4ed;
+    line-height: 16px;
+    margin-top: 0;
+}
+.page{
+    width: 976px;
+    background-color: #efefef;
+    margin-top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0px;
+}
+.header{
+    font-family: monospace;
+    font-weight: bold;
+    background-color: #c3a6d3;
+    text-align: center;
+    font-size: 35px;
+    width: 976px;
+    height: 50px;
+    border-radius: 4px 4px 4px 4px;
+    padding-top: 30px;
+}
+.content{
+    font-size: 18px;
+    text-align: center;
+}
+.login-form{
+    font-family: monospace;
+    padding-top: 10px;
+    font-size: 14px;
+    margin: 10px auto;
+    width: 300px;
+    border-radius: 4px 4px 4px 4px;
+    background-color:#feb5c0;
+}
+#id_password{
+    margin-left: 3px;
+}
+.choice{
+    font-family: monospace;
+    width:300px;
+    margin: 10px auto;
+}
+.choice-text{
+    font-family: monospace;
+    width:300px;
+    background-color:#aea3a4;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 4px 4px 4px 4px;
+    margin-bottom: 5px;
+}
+.welcome-user-text{
+    font-family: monospace;
+    font-size: 12px;
+    float: right;
+    margin-top: 2px;
+    margin-right: 3px;
+}
+.footer{
+    text-align: center;
+    font-family: monospace;
+    font-size: 13px;
+}
+.mark-attendance{
+    padding-top: 5px;
+    font-size: 14px;
+    background-color:#feb5c0;
+    font-family: monospace;
+    margin: 10px auto;
+    width: 350px;
+    border-radius: 4px 4px 4px 4px;
+}
+a:link {text-decoration:none;}
+a:visited {text-decoration:none;}
+a:hover {text-decoration:none;}
+a:active {text-decoration:none;}

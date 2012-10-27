@@ -1,16 +1,12 @@
-<html>
-<head>
-<title>AMS</title>
-</head>
-<body>
-{% if user.username %}
-<p>Welcome {{ user.username }}!</p>
-<a href="/logout/">logout</a>
-<a href="/mark_attendance">Mark Attendance</a>
-{% else %}
-<p>Welcome Guest!
-You need to <a href="/login/">login</a>
-</p>
-{% endif %}
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}AMS{% endblock %}
+{%block container%}
+<div class="choice">
+    <a href="/mark_attendance">
+        <div class="choice-text">Mark Attendance</div>
+    </a>
+    <a href="/attendance_detail">
+        <div class="choice-text">Attendance Details</div>
+    </a>
+</div>
+{% endblock %}

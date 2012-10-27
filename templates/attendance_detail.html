@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}AMS: Attendance Detail{% endblock %}
+{%block container%}
+<div class="mark-attendance">
+    <form method="post" action=".">
+      {% csrf_token %}
+      {{form}}
+      <input type="submit" name="" value="Get Details" style="margin-top: 5px;margin-bottom: 5px;" />
+    </form>
+    {% if usertime%}
+    <hr/>
+    <center>
+        <table border="1" style="margin-bottom: 5px;">
+        <caption><h3>Attendance Detail</h3></caption>
+        <th>Check In Time</th>
+        <th>Check Out Time</th>
+        {% for time in usertime %}
+        <tr>
+            <td style="text-align: center">{{ time.time_in.time}}</td>
+            <td style="text-align: center">{{ time.time_out.time}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+        {% if totaltime%}
+        You have spent {{totaltime}} approx
+        {% endif %}
+    {%else%}
+    No Entries in this date!
+    {% endif%}
+    </center>
+</div>
+{% endblock %}

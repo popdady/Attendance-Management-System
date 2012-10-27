@@ -6,138 +6,232 @@
 import datetime
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.contrib.auth import logout
 
 from amsUser.models import Attendance, UserTime, Time
+from amsUser.forms import AttendanceDetailForm
 
 def home_page(request):
-    '''This is the home page view. When user open the system this 
-    view will be displayed. request is a HttpRequest object.
+    '''This is the home page view for attendance management system.
+    :param request: is a HttpRequest object.
+    :return:if user is logged in then display home page.
+            if user is not logged in then redirect to login page
     '''
-    return render_to_response('home.html', {'user': request.user})
-
-
-def logout_page(request):
-    '''When user will make logout request then this view will be 
-    called. request is a HttpRequest object.
-    '''
-    logout(request)
-    return HttpResponseRedirect('/')
-
-
-def mark_attendance(request):
-    '''This describes how user will mark his/her attendance.
-     :param request: request is a HttpRequest object.
-    ''' 
-    view_table()
-    msg = ""
-    button_text = get_info(request.user)
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            msg = check_in_out(request.user)
-            view_table()
-        return render_to_response('mark_attendance.html',{'button_text': button_text,'msg': msg},context_instance = RequestContext(request))
+    if request.user.username:
+        return render_to_response('home.html', {'user': request.user})
     else:
         return HttpResponseRedirect('/login')
 
 
-def check_in_out(user_id):
-    '''This will allows a user to check in or check out for attendance.
-    if user is already checke in then he will be checke out and vice versa.
-    :param user_id: id of user who want to check in.
-    :return : This will return message(whether user is checked in or checked out)
+def logout_page(request):
+    '''When user will make logout request then this view will be called.
+    :param request: is a HttpRequest object.
+    :return: redirect to login page.
     '''
-    msg = "No message for you."
-    attendance_obj =  Attendance.objects.get(date=get_time_or_date("date"))
-    user_in_usertime = False
-    user_already_checkin = False
-    if not attendance_obj:
-        #if date is not cretated for a day then create it.
-        attendance_obj = Attendance.objects.create(date=get_time_or_date("date"),
-                                                    record=[UserTime(user_id=user_id, 
-                                                    time=[Time(time_in= get_time_or_date("time"))])])
-        msg = "%s has checked in"%(user_id.username)
+    logout(request)
+    return HttpResponseRedirect('/login')
+
+
+def mark_attendance(request):
+    '''When user want to mark attendance, this view will be called.
+    :param request: request is a HttpRequest object.
+    :return: if user is not logged in then redirect to login page.
+            if user do check in or check out then do it.
+    '''
+    if request.user.username:
+        if request.method == "POST":
+            if check_in_out(request.user):
+                msg = get_info(request.user)
+                return render_to_response('mark_attendance.html',
+                                    {'msg': msg[0], 'button_text': msg[1]},
+                                    context_instance=RequestContext(request))
+            else:
+                return HttpResponse("There is an error, please try again!")
+        else:
+            msg = get_info(request.user)
+            return render_to_response('mark_attendance.html',
+                                    {'msg': msg[0], 'button_text': msg[1]},
+                                    context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect('/login')
+
+
+def attendance_detail(request):
+    '''When user want to know attendance details, this view will be called.
+    :param request: is a HttpRequest object.
+    :return: According to user choice, it will return his attendance detail.
+    '''
+    if request.user.username:
+        if request.method == 'POST':
+            form = AttendanceDetailForm(request.POST)
+            if form.is_valid():
+                build_date = datetime.datetime(year=
+                                        int(request.POST['date_year']),
+                                        month=
+                                        int(request.POST['date_month']),
+                                        day=
+                                        int(request.POST['date_day']))
+                temp = get_checkinout_for_date(build_date, request.user)
+                return render_to_response('attendance_detail.html',
+                                    {'form': form,
+                                    'usertime': temp,
+                                    'totaltime': get_total_session_time(temp)},
+                                    context_instance=RequestContext(request))
+            else:
+                return HttpResponseRedirect('.')
+        else:
+            form = AttendanceDetailForm()
+            temp = get_checkinout_for_date(get_date_time, request.user)
+            return render_to_response('attendance_detail.html',
+                                    {'form': form,
+                                    'usertime': temp,
+                                    'totaltime': get_total_session_time(temp)},
+                                    context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect('/login')
+
+
+def get_checkinout_for_date(date_time, user_id):
+    '''This will give users all check in and check out of a given date.
+    :param date_time: datetime of which user want to know details.
+    :param user_id: user id
+    :return: time list if their is any entry otherwise False.
+    '''
+    attendance_obj_collection =  Attendance.objects.filter(date=date_time)
+    if not attendance_obj_collection:
+        return False
+    else:
+        attendance_obj = attendance_obj_collection[0]
     for usertime in attendance_obj.record:
         if user_id == usertime.user_id:
-            #that mean user is created for the date. now check whether he is check in or check out
+            return usertime.time
+    return False
+
+
+def get_total_session_time(usertime):
+    '''This will give total time spent in a date.
+    :param usertime: time list of check in and check out
+    :return: return total spent time if any, otherwise false.
+    '''
+    if usertime:
+        total = datetime.timedelta()
+        for time in usertime:
+            if time.time_out is None:
+                continue
+            else:
+                total += time.time_out-time.time_in
+        return total
+    else:
+        return False
+
+
+def check_in_out(user_id):
+    '''This will allows a user to check in or check out for attendance.
+    if user is already check in then he will be check out and vice versa.
+    :param user_id: id of user who want to check in.
+    :return: return True if sucess else False.
+    '''
+    attendance_obj_collection =  Attendance.objects.filter(date=
+                                                    get_date_time())
+    user_in_usertime = False
+    if not attendance_obj_collection:
+        #if date is not cretated for a day then create it.
+        attendance_obj = Attendance.objects.create(
+                                                date=get_date_time(),
+                                                record=
+                                                [UserTime(user_id=user_id,
+                                                time=[Time(time_in=
+                                                get_date_time())])])
+        return True
+    else:
+        attendance_obj = attendance_obj_collection[0]
+    for usertime in attendance_obj.record:
+        if user_id == usertime.user_id:
+            #that mean user is created for the date. now check whether he is 
+            #check in or check out
             user_in_usertime = True
-            for time in usertime.time:
-                if not time.time_out:
-                    #that mean user is already checked in. so checkout him.
-                    user_already_checkin = True
-                    time.time_out = get_time_or_date("time")
-                    attendance_obj.save()
-                    msg = "%s has checked out at %s"%(usertime.user_id.username,str(time.time_out))
-                    break
-            if user_already_checkin == False:
-                #that mean user is not checked in.
-                usertime.time.append(Time(time_in=get_time_or_date("time")))
+            if usertime.time[-1].time_out is None:
+                #that mean user is already checked in. so checkout him.
+                usertime.time[-1].time_out = get_date_time()
                 attendance_obj.save()
-                msg = "%s has checked in"%(usertime.user_id.username)
-            break
+                return True
+            else:
+                #that mean user is not checked in.
+                usertime.time.append(Time(time_in=get_date_time()))
+                attendance_obj.save()
+                return True
     if user_in_usertime == False:
-        #if user check in first time in a day then simply add check in entry
-        attendance_obj.record.append(UserTime(user_id=user_id,time=[Time(time_in=get_time_or_date(time))]))
+        #if user check in first time in a day and date entry is already
+        #created, then simply add check in entry
+        attendance_obj.record.append(UserTime(user_id=user_id,
+                                                time=[Time(time_in=
+                                                get_date_time())]))
         attendance_obj.save()
-        msg = "%s has checked in"%(user_id.username)
-    return msg
+        return True
+    return False
 
 
-def get_time_or_date(option):
+def get_date_time():
+    '''This will give datetime.
+    :return: datetime.datetime object
     '''
-    :param option:  if option=="time" then it will return time
-                    if option=="date"  then it will return date
-    :return : It will return time or date, depending upon option 
-    '''
-    if option == "time":
-        time_or_date = datetime.datetime.now()
-    elif option == "date":
-        time_or_date = datetime.date.today()
-    return time_or_date
+    return datetime.datetime.now()
 
 
 def view_table():
     '''This prints all the data from attendance table.
+    this function is for test purpose.
     '''
     for row in Attendance.objects.all():
         print "########################"
-        print "Record for date:%s"%str(row.date)
+        print "Record for date:%s" % str(row.date)
         print "########################"
         for usertime in row.record:
             print usertime.user_id.username
             for time in usertime.time:
-                print "checked in at:"+str(time.time_in)
-                print "checked out at:"+str(time.time_out)
+                print "checked in at:" + str(time.time_in)
+                print "checked out at:" + str(time.time_out)
         print "########################"
         print "########################"
 
+
 def get_info(user_id):
-    '''This will return button text.
+    '''This will fetch information of check in and check out.
+    :return: a msg dictionary. In which '0' key msg to user and '1' key
+            the button text.
     '''
-    msg = ""
-    attendance_obj = Attendance.objects.get(date=get_time_or_date("date"))
+    msg = {}
+    attendance_obj_collection = Attendance.objects.filter(date=get_date_time())
     user_in_usertime = False
-    user_already_checkin = False
-    if not attendance_obj:
+    if not attendance_obj_collection:
         #that mean user is coming first time in this day. welcome him
-        msg = "Check In"
+        msg[0] = "Welcome " + user_id.username
+        msg[1] = "Check In"
+        return msg
+    else:
+        #that mean someone has already mark his attendance in this date
+        attendance_obj = attendance_obj_collection[0]
     for usertime in attendance_obj.record:
         if user_id == usertime.user_id:
             #user has either check in or check out once in this day
             user_in_usertime = True
-            for time in usertime.time:
-                if not time.time_out:
-                    #that mean user is already checked in.
-                    user_already_checkin = True
-                    msg = "Check Out"
-                    break
-            if user_already_checkin == False:
+            if usertime.time[-1].time_out is None:
+                #that mean user is already checked in.
+                msg[0] = "You have last Checked in at %s" % (
+                                            usertime.time[-1].time_in.time())
+                msg[1] = "Check Out"
+                return msg
+            else:
                 #that mean user is not checked in.
-                msg = "Check In"
-            break
+                msg[0] = "You have last Checked out at %s" % (
+                                            usertime.time[-1].time_out.time())
+                msg[1] = "Check In"
+                return msg
     if user_in_usertime == False:
         #if user check in first time in a day
-        msg = "Check In"
+        msg[0] = "Welcome " + user_id.username
+        msg[1] = "Check In"
+        return msg
     return msg
