@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}AMS: Holiday List{% endblock %}
+{%block container%}
+<div class="mark-attendance">
+    <form method="post" action=".">
+      {% csrf_token %}
+      {{form}}
+      <input type="submit" name="" value="Holidays" style="margin-top: 5px;margin-bottom: 5px;" />
+    </form>
+    {% if holidays%}
+    <hr/>
+    <center>
+        <table border="1" style="margin-bottom: 5px;">
+        <caption><h3>Holidays List</h3></caption>
+        <th>Dates</th>
+        <th>Purpose</th>
+        {% for key,value in holidays.items %}
+        <tr>
+            <td style="text-align: center">{{ key}}</td>
+            <td style="text-align: center">{{ value}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+        {% if totalholidays%}
+        Total Holidays this month: {{totalholidays}} days
+        {% endif %}
+    {%else%}
+    No Holidays for this month
+    {% endif%}
+    </center>
+</div>
+{% endblock %}

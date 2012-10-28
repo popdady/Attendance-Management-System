@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.contrib.auth import logout
 
-from amsUser.models import Attendance, UserTime, Time
+from amsUser.models import Attendance, UserTime, Time, Holiday
 from amsUser.forms import AttendanceDetailForm
 
 def home_page(request):
@@ -235,3 +235,55 @@ def get_info(user_id):
         msg[1] = "Check In"
         return msg
     return msg
+
+
+def holiday_list(request):
+    '''when user want to see holiday list, this view will be called.
+    '''
+    if request.user.username:
+        if request.method == 'POST':
+            form = AttendanceDetailForm(request.POST)
+            if form.is_valid():
+                build_date = datetime.datetime(year=
+                                        int(request.POST['date_year']),
+                                        month=
+                                        int(request.POST['date_month']),
+                                        day=
+                                        int(request.POST['date_day']))
+                temp = get_holidays(build_date)
+                return render_to_response('holiday_list.html',
+                                    {'form': form,
+                                    'holidays': temp,
+                                    'totalholidays': len(temp)},
+                                    context_instance=RequestContext(request))
+            else:
+                return HttpResponseRedirect('.')
+        else:
+            form = AttendanceDetailForm()
+            temp = get_holidays(get_date_time())
+            return render_to_response('holiday_list.html',
+                                    {'form': form,
+                                    'holidays': temp,
+                                    'totalholidays': len(temp)},
+                                    context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect('/login')
+
+
+def get_holidays(date_time):
+    '''This function will give all the holiday list of that month/year.
+    :param date_time
+    '''
+    holiday_dates = {}
+    holiday_obj_collection = Holiday.objects.all()
+    if holiday_obj_collection:
+        for holiday in holiday_obj_collection:
+            delta = holiday.to_date - holiday.from_date
+            for i in range(delta.days + 1):
+                temp = holiday.from_date + datetime.timedelta(days=i)
+                if (temp.month == date_time.month) and (
+                                temp.year == date_time.year):
+                    holiday_dates[temp] = holiday.purpose
+        return holiday_dates
+    else:
+        return False
