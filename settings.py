@@ -118,6 +118,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'djangotoolbox',
     'amsUser',
+    'amsAdmin',
     'django_mongodb_engine',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',

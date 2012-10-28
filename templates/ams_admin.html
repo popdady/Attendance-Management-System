@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}AMS{% endblock %}
+{%block container%}
+<center><h3>You are at Admin Site</h3></center>
+<div class="choice">
+    <a href="/mark_all_attendance">
+        <div class="choice-text">Mark All Attendance</div>
+    </a>
+    <a href="/attendance_detail">
+        <div class="choice-text">Get Attendance Details</div>
+    </a>
+    <a href="/edit_view_holidays">
+        <div class="choice-text">Add Holidays</div>
+    </a>
+</div>
+{% endblock %}

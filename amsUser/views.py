@@ -180,23 +180,6 @@ def get_date_time():
     return datetime.datetime.now()
 
 
-def view_table():
-    '''This prints all the data from attendance table.
-    this function is for test purpose.
-    '''
-    for row in Attendance.objects.all():
-        print "########################"
-        print "Record for date:%s" % str(row.date)
-        print "########################"
-        for usertime in row.record:
-            print usertime.user_id.username
-            for time in usertime.time:
-                print "checked in at:" + str(time.time_in)
-                print "checked out at:" + str(time.time_out)
-        print "########################"
-        print "########################"
-
-
 def get_info(user_id):
     '''This will fetch information of check in and check out.
     :return: a msg dictionary. In which '0' key msg to user and '1' key

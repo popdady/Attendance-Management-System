@@ -8,10 +8,13 @@
             <div class="welcome-user-text">
                 {%if user.username%}
                 Welcome {{user.username}}!
+                {% if user.is_superuser%}
+                <a href="/ams_admin/">Admin Site</a>|
+                {%endif%}
                 <a href="/logout/">Logout</a>
                 {%else%}
                 Welcome Guest!
-          {%endif%}
+                {%endif%}
             </div>
             <div class="header">
                 Attendance Management System
