@@ -14,8 +14,8 @@ class Time(models.Model):
     '''This model will store the time_in(time when user check in) and
     time_out(time when user check out).
     '''
-    time_in = models.TimeField()
-    time_out = models.TimeField()
+    time_in = models.DateTimeField()
+    time_out = models.DateTimeField()
 
 
 class UserTime(models.Model):

@@ -267,6 +267,4 @@ def get_holidays(date_time):
                 if (temp.month == date_time.month) and (
                                 temp.year == date_time.year):
                     holiday_dates[temp] = holiday.purpose
-        return holiday_dates
-    else:
-        return False
+    return holiday_dates
